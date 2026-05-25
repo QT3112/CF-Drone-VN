@@ -57,40 +57,40 @@ void calibrateGyroOnce() {
 }
 
 void calibrateAccel() {
-	print("校准陀螺仪加速计 Calibrating accelerometer\n");
+	print("Đang hiệu chuẩn con quay hồi chuyển và gia tốc kế Calibrating accelerometer\n");
 	imu.setAccelRange(imu.ACCEL_RANGE_2G); // the most sensitive mode
 
-	print("1/6 水平放置：机头朝前（正常飞行方向），底部朝下水平放置在平坦表面，确保完全水平无倾斜。保持不动，8秒后开始校准；\n");
+	print("1/6 Nằm ngang: Đầu hướng về phía trước (hướng bay bình thường), đáy hướng xuống nằm ngang trên bề mặt phẳng, đảm bảo hoàn toàn phẳng không nghiêng. Giữ bất động, sẽ bắt đầu hiệu chuẩn sau 8 giây;\n");
 	pause(8);
 	calibrateAccelOnce();
-	print("水平校准完成。请继续。\n");
+	print("Hiệu chuẩn nằm ngang hoàn tất. Vui lòng tiếp tục.\n");
 	pause(1);
-	print("2/6 机头朝上：保持机头朝前,将机头指向天空，尾部朝下并接触支撑面，与地面垂直。保持不动，8秒后开始校准；\n");
+	print("2/6 Mũi hướng lên: Giữ mũi hướng về phía trước, chĩa mũi lên trời, đuôi chạm mặt phẳng hỗ trợ, vuông góc với mặt đất. Giữ bất động, sẽ bắt đầu hiệu chuẩn sau 8 giây;\n");
 	pause(8);
 	calibrateAccelOnce();
-	print("机头向上校准完成。请继续。\n");
+	print("Hiệu chuẩn mũi hướng lên hoàn tất. Vui lòng tiếp tục.\n");
 	pause(1);
-	print("3/6 机头朝下：保持机头朝前,将机头指向地面并接触支撑面，尾部朝上，与地面垂直。保持不动，8秒后开始校准；\n");
+	print("3/6 Mũi hướng xuống: Giữ mũi hướng về phía trước, chĩa mũi xuống đất chạm mặt phẳng hỗ trợ, đuôi hướng lên, vuông góc với mặt đất. Giữ bất động, sẽ bắt đầu hiệu chuẩn sau 8 giây;\n");
 	pause(8);
 	calibrateAccelOnce();
-	print("机头向下校准完成。请继续。\n");
+	print("Hiệu chuẩn mũi hướng xuống hoàn tất. Vui lòng tiếp tục.\n");
 	pause(1);
-	print("4/6 右侧朝下：保持机头朝前,将飞行器右侧朝下并接触支撑面，左侧机臂朝上，与地面垂直。保持不动，8秒后开始校准；\n");
+	print("4/6 Cạnh phải hướng xuống: Giữ mũi hướng về phía trước, đặt cạnh phải hướng xuống chạm mặt phẳng hỗ trợ, tay đòn bên trái hướng lên, vuông góc với mặt đất. Giữ bất động, sẽ bắt đầu hiệu chuẩn sau 8 giây;\n");
 	pause(8);
 	calibrateAccelOnce();
-	print("右侧向下校准完成。请继续。\n");
+	print("Hiệu chuẩn cạnh phải hướng xuống hoàn tất. Vui lòng tiếp tục.\n");
 	pause(1);
-	print("5/6 左侧朝下：保持机头朝前,将飞行器左侧朝下并接触支撑面，右侧机臂朝上，与地面垂直。保持不动，8秒后开始校准；\n");
+	print("5/6 Cạnh trái hướng xuống: Giữ mũi hướng về phía trước, đặt cạnh trái hướng xuống chạm mặt phẳng hỗ trợ, tay đòn bên phải hướng lên, vuông góc với mặt đất. Giữ bất động, sẽ bắt đầu hiệu chuẩn sau 8 giây;\n");
 	pause(8);
 	calibrateAccelOnce();
-	print("左侧向下校准完成。请继续。\n");
+	print("Hiệu chuẩn cạnh trái hướng xuống hoàn tất. Vui lòng tiếp tục.\n");
 	pause(1);
-	print("6/6 倒置放置：保持机头朝前,将飞行器完全翻转，顶部朝下、底部朝上，整体呈水平倒置状态。保持不动，8秒后开始校准；\n");
+	print("6/6 Lộn ngược: Giữ mũi hướng về phía trước, lật úp máy bay hoàn toàn, đỉnh hướng xuống, đáy hướng lên, toàn bộ nằm ngang úp xuống. Giữ bất động, sẽ bắt đầu hiệu chuẩn sau 8 giây;\n");
 	pause(8);
 	calibrateAccelOnce();
 
 	printIMUCalibration();
-	print("✓全部校准完成！将机身放正，执行ps命令查看校准结果。\n");
+	print("✓ Hoàn tất tất cả các bước hiệu chuẩn! Đặt thân máy bay thẳng lại, chạy lệnh ps để xem kết quả hiệu chuẩn.\n");
 	configureIMU();
 }
 

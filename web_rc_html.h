@@ -1,28 +1,28 @@
-// 网页遥控器客户端界面
+// Giao diện người dùng Web RC
 
 #if WEB_RC_ENABLED
 
 const char webRCIndexHtml[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>Điều khiển CF-Drone qua Web</title>
 <style>
-/*======== 响应式变量 ========*/
+/*======== Biến Responsive ========*/
 :root{
   --js-size:clamp(150px,min(50vw,62vh),420px);
   --knob-size:calc(var(--js-size)*0.25);
   --pad:clamp(6px,1.5vmin,15px);
   --gap:clamp(6px,1.5vmin,15px);
 }
-/*======== 通用样式 ========*/
+/*======== CSS Chung ========*/
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:none;user-select:none}
 body{font-family:'Roboto Mono',Arial,"Microsoft YaHei",sans-serif;background:#3c3c3c;color:#fff;overflow:hidden;height:100vh;height:100dvh;width:100vw}
 .container{width:100%;height:100%;display:flex;flex-direction:column;padding:var(--pad);gap:var(--gap);max-width:1200px;margin:0 auto;overflow:hidden}
 
-/*======== 顶部状态栏 ========*/
+/*======== Thanh trạng thái trên cùng ========*/
 .header {
   text-align: center;
   padding: 6px 10px;
@@ -74,7 +74,7 @@ body{font-family:'Roboto Mono',Arial,"Microsoft YaHei",sans-serif;background:#3c
 .status-dot.disconnected { background: #f33; box-shadow: 0 0 8px #f33; }
 .status-dot.warning { background: #ff9; box-shadow: 0 0 8px #ff9; }
 
-/*======== 内容区 ========*/
+/*======== Vùng nội dung ========*/
 .content{display:flex;flex:1;gap:var(--gap);overflow:hidden;min-height:0}
 .joystick-container{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,.4);border-radius:20px;padding:clamp(8px,1.5vmin,15px);border:2px solid rgba(255,255,255,0.15);box-shadow:inset 0 0 30px rgba(0,0,0,.5)}
 .joystick-title{font-size:clamp(0.75rem,2.2vmin,1.1rem);color:#cccccc}
@@ -84,7 +84,7 @@ body{font-family:'Roboto Mono',Arial,"Microsoft YaHei",sans-serif;background:#3c
 .joystick::after{content:'';position:absolute;top:50%;left:50%;width:100%;height:2px;background:linear-gradient(to right,transparent,rgba(255,255,255,.15),transparent);transform:translate(-50%,-50%)}
 .joystick-knob{width:var(--knob-size);height:var(--knob-size);background:radial-gradient(circle at 30% 30%,#fff,#cccccc);border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border:2px solid rgba(255,255,255,.7);box-shadow:0 4px 15px rgba(0,0,0,.5),inset 0 0 10px rgba(255,255,255,.5);cursor:move;transition:transform .1s ease-out;z-index:10}
 
-/*======== 按钮区 ========*/
+/*======== Vùng nút bấm ========*/
 .buttons-container{flex:.55;display:flex;flex-direction:column;gap:10px;padding:12px;background:rgba(0,0,0,.4);border-radius:20px;border:2px solid rgba(150,150,150,.3);box-shadow:inset 0 0 20px rgba(0,0,0,.5)}
 .buttons-grid{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(2,1fr);gap:8px;flex:1}
 .buttons-grid>button{grid-column:span 2}
@@ -95,18 +95,18 @@ body{font-family:'Roboto Mono',Arial,"Microsoft YaHei",sans-serif;background:#3c
 .button:active{transform:scale(.92)}
 .button-icon{font-size:1.1rem;margin-bottom:4px}
 
-/*======== 调试控制台 ========*/
+/*======== Console Gỡ lỗi ========*/
 .console-panel{background:rgba(10,10,10,.95);border-radius:12px;border:1px solid rgba(100,100,100,.4);padding:10px;flex-shrink:0;max-height:min(200px,35vh);display:flex;flex-direction:column;gap:6px}
 .console-output{flex:1;overflow-y:auto;font-family:'Courier New',monospace;font-size:0.7rem;color:#00ff88;min-height:80px;max-height:130px;word-break:break-all;-webkit-overflow-scrolling:touch}
 .console-output div{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.03)}
 
-/*======== 动画 ========*/
+/*======== Hiệu ứng ========*/
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(67,97,238,.7)}70%{box-shadow:0 0 0 12px rgba(67,97,238,0)}100%{box-shadow:0 0 0 0 rgba(67,97,238,0)}}
 .joystick.active{animation:pulse 1.5s infinite}
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .container>*{animation:fadeIn .5s ease-out}
 
-/*======== 竖屏自适应 ========*/
+/*======== Responsive màn hình dọc ========*/
 @media (orientation:portrait){
   :root{--js-size:clamp(120px,40vw,240px);--knob-size:calc(var(--js-size)*0.25)}
   .content{
@@ -125,7 +125,7 @@ body{font-family:'Roboto Mono',Arial,"Microsoft YaHei",sans-serif;background:#3c
   .status-item{font-size:clamp(0.6rem,2.5vw,0.7rem);padding:2px 5px}
 }
 
-/*======== 小屏横屏自适应（高度≤420px）========*/
+/*======== Responsive màn hình ngang nhỏ (cao ≤ 420px) ========*/
 @media (max-height:420px) and (orientation:landscape){
   :root{--js-size:clamp(120px,min(42vw,44vh),240px);--knob-size:calc(var(--js-size)*0.25)}
   .joystick-title{font-size:0.72rem}
@@ -137,7 +137,7 @@ body{font-family:'Roboto Mono',Arial,"Microsoft YaHei",sans-serif;background:#3c
   .button{font-size:0.68rem;padding:5px 3px}
   .button-icon{font-size:0.88rem;margin-bottom:2px}
 }
-/*======== 版权页脚 ========*/
+/*======== Footer bản quyền ========*/
 .footer{text-align:center;font-size:0.5rem;color:rgba(255,255,255,.25);padding:0;flex-shrink:0;line-height:0.8;}
 .footer a{color:rgba(255,255,255,.3);text-decoration:none}
 .footer a:hover{color:rgba(255,255,255,.55)}
@@ -145,7 +145,7 @@ body{font-family:'Roboto Mono',Arial,"Microsoft YaHei",sans-serif;background:#3c
 </head>
 <body>
 <div class="container">
-  <!-- 顶部状态栏 -->
+  <!-- Thanh trạng thái trên cùng -->
   <div class="header">
     <h1>Điều khiển CF-Drone qua Web</h1>
     <div class="status-bar">
@@ -163,7 +163,7 @@ body{font-family:'Roboto Mono',Arial,"Microsoft YaHei",sans-serif;background:#3c
   </div>
 
   <div class="content">
-    <!-- 左摇杆 -->
+    <!-- Joystick trái -->
     <div class="joystick-container">
       <div class="joystick-title">Cần Trái (Ga/Xoay)</div>
       <div class="joystick-wrapper">
@@ -171,12 +171,12 @@ body{font-family:'Roboto Mono',Arial,"Microsoft YaHei",sans-serif;background:#3c
       </div>
     </div>
 
-    <!-- 按钮区 -->
+    <!-- Vùng nút bấm -->
     <div class="buttons-container">
       <div class="buttons-grid" id="buttons-container"></div>
     </div>
 
-    <!-- 右摇杆 -->
+    <!-- Joystick phải -->
     <div class="joystick-container">
       <div class="joystick-title">Cần Phải (Tiến-Lùi/Nghiêng)</div>
       <div class="joystick-wrapper">
@@ -185,7 +185,7 @@ body{font-family:'Roboto Mono',Arial,"Microsoft YaHei",sans-serif;background:#3c
     </div>
   </div>
 
-  <!-- 调试控制台面板（默认隐藏，点击调试按钮打开） -->
+  <!-- Panel console gỡ lỗi (mặc định ẩn, nhấn nút Gỡ lỗi để mở) -->
   <div id="console-panel" class="console-panel" style="display:none">
     <div id="console-output" class="console-output"></div>
     <div style="display:flex;gap:6px;touch-action:auto">
@@ -194,48 +194,48 @@ body{font-family:'Roboto Mono',Arial,"Microsoft YaHei",sans-serif;background:#3c
       <button onclick="sendConsoleCmd()" style="background:#1a73e8;border:none;border-radius:6px;color:#fff;padding:4px 10px;font-size:0.7rem;cursor:pointer;touch-action:auto">Gửi</button>
     </div>
   </div>
-  <!-- 版权页脚 -->
+  <!-- Footer bản quyền -->
   <div class="footer"><a href="https://oshwhub.com/songge8/project_qqqyfdkm" target="_blank">Dự án mã nguồn mở CF-Drone</a></div>
 </div>
 
 <script>
-/*======================== 全局变量 ========================*/
+/*======================== Biến toàn cục ========================*/
 let lastAnimationTime = 0;
 let connectionOk = false;
 let packetStats = { sent: 0, lost: 0 };
 let latencyHistory = new Array(10).fill(0);
 let latencyIndex = 0;
-const SEND_INTERVAL = 50;  // ~20Hz 摇杆检测频率
-const FORCE_SEND_INTERVAL = 200; // 静止时强制重发间隔（ms），保持飞控数据新鲜
+const SEND_INTERVAL = 50;  // Tần số quét joystick ~20Hz
+const FORCE_SEND_INTERVAL = 200; // Thời gian gửi lại (ms) khi đứng im, giữ dữ liệu FC luôn mới
 
 const touches = new Map();
 let leftStick  = {x:0, y:0, rawX:0, rawY:-100};
 let rightStick = {x:0, y:0, rawX:0, rawY:0};
 
 let lastSentValues = { throttle:0, roll:0, pitch:0, yaw:0 };
-let lastForceSentTime = 0; // 上次强制重发的时间戳（performance.now()）
+let lastForceSentTime = 0; // Timestamp lần gửi lại cuối cùng (performance.now())
 let currentValues  = { throttle:0, roll:0, pitch:0, yaw:0 };
 const MIN_CHANGE_THRESHOLD = 0.5;
 
-// 固定参数常量（替代前端参数调节面板，与后端 CONFIG_ 对应）
-const DEADZONE = 3;   // 死区（已移至后端 stickDeadzone 统一处理，前端不再使用）
-const EXPO    = 40;   // 指数曲线 40%
-let consecutiveFails = 0; // 连续失败计数，>=3 才判定断连
-let currentFlightMode = 2; // 当前飞行模式编号（与后端同步：2=自稳）
+// Hằng số tham số cố định (thay thế panel cài đặt frontend, tương ứng với CONFIG_ backend)
+const DEADZONE = 3;   // Deadzone (đã chuyển sang xử lý ở stickDeadzone backend, frontend không dùng nữa)
+const EXPO    = 40;   // Đường cong EXPO 40%
+let consecutiveFails = 0; // Đếm số lần lỗi liên tiếp, >=3 thì báo mất kết nối
+let currentFlightMode = 2; // Mã chế độ bay hiện tại (đồng bộ backend: 2=Cân bằng)
 
 let buttonStates     = new Array(16).fill(false);
 let lastButtonStates = new Array(16).fill(false);
 
-let lastPressedButton = -1; // 最近一次操作的按鈕编号，用于后端返回时判断结果 toast
+let lastPressedButton = -1; // ID nút vừa nhấn, dùng để hiển thị kết quả từ backend (toast)
 let consolePollingTimer = null;
-let consoleLastTotal    = 0;   // 增量拉取游标：已展示到第 N 行
-let consoleFetchInFlight = false; // 防并发：上次 fetch 未返回时跳过本次
+let consoleLastTotal    = 0;   // Con trỏ lấy log: đã hiển thị đến dòng thứ N
+let consoleFetchInFlight = false; // Chống fetch đồng thời: bỏ qua nếu fetch trước đó chưa trả về
 let consolePanelOpen = false;
 const CONSOLE_BASE_POLL_MS = 500;
 const CONSOLE_CATCHUP_POLL_MS = 80;
 const CONSOLE_PAGE_LIMIT = 20;
 
-/*======================== 按钮配置（2×3 六宫格）========================*/
+/*======================== Cấu hình nút (2×3 lưới) ========================*/
 const buttonConfigs = [
   {icon:"🔓",label:"Mở khóa",   color:"#00ff88",desc:"Mở khóa motor"},
   {icon:"🔒",label:"Khóa",   color:"#ff3333",desc:"Khóa motor"},
@@ -244,7 +244,7 @@ const buttonConfigs = [
   {icon:"🖥",label:"Gỡ lỗi",   color:"#4a9eff",desc:"Bảng điều khiển gỡ lỗi"}
 ];
 
-/*======================== 初始化 ========================*/
+/*======================== Khởi tạo ========================*/
 function init() {
   initButtons();
   initNetwork();
@@ -254,13 +254,13 @@ function init() {
 }
 
 function initKnobPositions() {
-  // 根据初始 rawY 将旋鈕定位到正确位置（左摇杆油门在底部）
+  // Đặt vị trí knob dựa trên rawY khởi tạo (Throttle joystick trái ở dưới cùng)
   const joystick = document.getElementById('joystick-left');
   const knob     = document.getElementById('knob-left');
   const rect     = joystick.getBoundingClientRect();
-  if (rect.width === 0) { requestAnimationFrame(initKnobPositions); return; } // 布局未就绪则重试
+  if (rect.width === 0) { requestAnimationFrame(initKnobPositions); return; } // Layout chưa sẵn sàng thì thử lại
   const radius = rect.width / 2 - 10;
-  const dy = -leftStick.rawY / 100 * radius; // rawY=-100 → dy=radius（底部）
+  const dy = -leftStick.rawY / 100 * radius; // rawY=-100 → dy=radius (dưới cùng)
   knob.style.transform = `translate(calc(-50% + 0px), calc(-50% + ${dy}px))`;
 }
 
@@ -300,7 +300,7 @@ function initPointerEvents() {
   });
 }
 
-/*======================== 动画循环 ========================*/
+/*======================== Vòng lặp hiệu ứng ========================*/
 function animationLoop(timestamp) {
   if (timestamp - lastAnimationTime >= SEND_INTERVAL) {
     processJoystickInput();
@@ -311,8 +311,8 @@ function animationLoop(timestamp) {
   requestAnimationFrame(animationLoop);
 }
 
-/*======================== 摇杆曲线处理 ========================*/
-// 仅做 expo 曲线，死区由后端 stickDeadzone 统一处理（对齐 SBUS 模式）
+/*======================== Xử lý đường cong Joystick ========================*/
+// Chỉ áp dụng expo curve, deadzone do stickDeadzone backend xử lý (như SBUS)
 function applyCurve(value) {
   const absVal = Math.abs(value);
   const expoFactor = EXPO / 100;
@@ -320,15 +320,15 @@ function applyCurve(value) {
   return curved * (value >= 0 ? 1 : -1);
 }
 
-/*======================== 摇杆数据处理 ========================*/
+/*======================== Xử lý dữ liệu Joystick ========================*/
 function processJoystickInput() {
-  // 发送原始值，后端统一完成映射（对齐SBUS/MAVLink模式，避免双重映射）
-  // 油门：rawY∈[-100,+100]，后端 processThrottle: (raw+100)/(2*RAW_MAX)*100 → 0~100%
-  // 姿态轴：归一化到[-1,1]做指数曲线后还原×100，后端除以RAW_MAX得[-1,1]
+  // Gửi giá trị raw, backend sẽ mapping (như SBUS/MAVLink, tránh mapping 2 lần)
+  // Throttle: rawY∈[-100,+100], backend processThrottle: (raw+100)/(2*RAW_MAX)*100 → 0~100%
+  // Các trục góc: chuẩn hóa [-1,1], tính expo rồi nhân 100, backend chia RAW_MAX lấy [-1,1]
   currentValues.throttle = leftStick.rawY;
-  currentValues.yaw   = applyCurve(leftStick.rawX  / 100) * 100;  // 右推=顺时针，与MAVLink一致
-  currentValues.pitch = applyCurve(rightStick.rawY / 100) * 100;  // 上推=前进，与MAVLink一致
-  currentValues.roll  = applyCurve(rightStick.rawX / 100) * 100;  // 右推=右滚，与MAVLink一致
+  currentValues.yaw   = applyCurve(leftStick.rawX  / 100) * 100;  // Đẩy sang phải = Thuận chiều kim đồng hồ, giống MAVLink
+  currentValues.pitch = applyCurve(rightStick.rawY / 100) * 100;  // Đẩy lên = Tiến, giống MAVLink
+  currentValues.roll  = applyCurve(rightStick.rawX / 100) * 100;  // Đẩy sang phải = Nghiêng phải, giống MAVLink
   leftStick.x  = currentValues.yaw;
   leftStick.y  = leftStick.rawY;
   rightStick.x = currentValues.roll;
@@ -344,7 +344,7 @@ function hasSignificantChange(nv) {
 
 function checkAndSendChanges() {
   const now = performance.now();
-  // 有变化立即发；或超过强制重发间隔时也发一次（保持飞控侧数据新鲜，避免超时断连）
+  // Gửi ngay nếu có thay đổi; hoặc gửi lại theo chu kỳ để giữ dữ liệu mới cho FC, tránh mất tín hiệu
   if (hasSignificantChange(currentValues) || (now - lastForceSentTime >= FORCE_SEND_INTERVAL)) {
     sendJoystickData();
     lastForceSentTime = now;
@@ -357,7 +357,7 @@ function checkAndSendChanges() {
   }
 }
 
-/*======================== 数据发送函数 ========================*/
+/*======================== Hàm Gửi dữ liệu ========================*/
 function sendJoystickData() {
   sendToESP('/web_rc', { t:1, th:Math.round(currentValues.throttle), r:Math.round(currentValues.roll),
     p:Math.round(currentValues.pitch), y:Math.round(currentValues.yaw), ts:performance.now() });
@@ -369,7 +369,7 @@ function sendButtonData(buttonIndex, state) {
   sendToESP('/web_rc', { t:2, b:buttonIndex, s:state ? 1 : 0, ts:performance.now() });
 }
 
-/*======================== 显示更新 ========================*/
+/*======================== Cập nhật hiển thị ========================*/
 function updateDisplayAll() {
   document.getElementById('left-y').textContent  = Math.round((currentValues.throttle + 100) / 2);
   document.getElementById('left-x').textContent  = Math.round(leftStick.x);
@@ -377,7 +377,7 @@ function updateDisplayAll() {
   document.getElementById('right-y').textContent = Math.round(rightStick.y);
 }
 
-/*======================== Pointer Events 处理 ========================*/
+/*======================== Xử lý Pointer Events ========================*/
 function handlePointerStart(e, side) {
   touches.set(e.pointerId, side);
   document.getElementById(`joystick-${side}`).classList.add('active');
@@ -394,7 +394,7 @@ function handlePointerEnd(e, side) {
   const knob     = document.getElementById(`knob-${side}`);
   const joystick = document.getElementById(`joystick-${side}`);
   joystick.classList.remove('active');
-  // 计算归位目标：左摇杆Y轴非ALTHOLD时归底，其他归中
+  // Tính vị trí trả về: Trục Y trái về đáy (trừ khi ALTHOLD), các trục khác về giữa
   const targetRawY = (side === 'left' && currentFlightMode !== 3) ? -100 : 0;
   const radius = joystick.getBoundingClientRect().width / 2 - 10;
   const targetDy = -targetRawY / 100 * radius;
@@ -422,7 +422,7 @@ function updateJoystickPosition(side, clientX, clientY) {
   else                  { rightStick.rawX =  dx/radius*100; rightStick.rawY = -dy/radius*100; }
 }
 
-/*======================== 网络处理 ========================*/
+/*======================== Xử lý Mạng ========================*/
 function sendToESP(url, data) {
   const t0 = performance.now();
   fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) })
@@ -432,7 +432,7 @@ function sendToESP(url, data) {
       updateConnectionStatus(true);
       const names = ['Chỉnh tay','Acro','Cân bằng','Giữ độ cao','Tự động'];
 
-      // 模式切换结果
+      // Kết quả chuyển chế độ
       if (resp.m !== undefined) {
         if (resp.m !== currentFlightMode) {
           if (!resp.warn) showToast('✅ Đã chuyển: ' + (names[resp.m] || 'Không rõ'));
@@ -443,7 +443,7 @@ function sendToESP(url, data) {
         document.getElementById('flight-mode').textContent = names[resp.m] || 'Cân bằng';
       }
 
-      // ARM 状态更新 + 结果 toast
+      // Cập nhật trạng thái ARM + Toast kết quả
       if (resp.arm !== undefined) {
         const el   = document.getElementById('armed-status');
         const item = document.getElementById('armed-status-item');
@@ -460,10 +460,10 @@ function sendToESP(url, data) {
         }
       }
 
-      // 后端警告——最后处理，保证覆盖前面的 toast
+      // Cảnh báo từ backend — xử lý cuối để ghi đè toast trước đó
       if (resp.warn) showToast('⚠️ ' + resp.warn);
 
-      lastPressedButton = -1; // 清空，避免摇杆包轮询触发
+      lastPressedButton = -1; // Reset, tránh bị kích hoạt bởi packet joystick
     })
     .catch(() => {
       if (++consecutiveFails >= 3) updateConnectionStatus(false);
@@ -494,7 +494,7 @@ function updateConnectionStatus(connected) {
   if (connected) { dot.className='status-dot connected'; text.textContent='Đã kết nối'; text.style.color='#0f8'; }
   else           { dot.className='status-dot disconnected'; text.textContent='Mất kết nối'; text.style.color='#f33'; }
 }
-/*======================== 油门位置重置 ========================*/
+/*======================== Reset vị trí Throttle ========================*/
 function resetLeftStick(targetRawY) {
   const knob     = document.getElementById('knob-left');
   const joystick = document.getElementById('joystick-left');
@@ -509,40 +509,40 @@ function resetLeftStick(targetRawY) {
   processJoystickInput();
   sendJoystickData();
 }
-/*======================== 按钮处理 ========================*/
+/*======================== Xử lý Nút ========================*/
 function handleButton(idx) {
   if (idx === 4) { toggleConsole(); return; }
   if (idx === 3) {
-    // 模式循环：自稳(2)→特技(1)→定高(3)→自稳
-    // 不在点击时弹 toast，结果完全依赖后端 resp.m 确认后触发
+    // Vòng lặp: Cân bằng(2)→Acro(1)→Giữ độ cao(3)→Cân bằng
+    // Không hiện toast khi bấm, kết quả toast dựa vào resp.m từ backend trả về
     let nextBit;
     if (currentFlightMode === 2)      nextBit = 7; // STAB→ACRO
     else if (currentFlightMode === 1) nextBit = 8; // ACRO→ALTHOLD
-    else                              nextBit = 6; // 其他→STAB
+    else                              nextBit = 6; // Các chế độ khác →STAB
     lastPressedButton = 3;
     sendButtonData(nextBit, 1);
     setTimeout(() => sendButtonData(nextBit, 0), 100);
     if (navigator.vibrate) navigator.vibrate(30);
     return;
   }
-  // 解锁/上锁/急停：点击时显示中间态。
-  // lastPressedButton 必须在 state=0 发送前设置：
-  // state=1 的响应返回时 interpretWebRC 还未执行（armed 未变）；
-  // state=0 的响应返回时 armed 已由 control 循环更新，才是真实结果。
+  // Mở khóa/Khóa/Dừng khẩn: Hiện trạng thái trung gian khi bấm.
+  // lastPressedButton phải được set trước khi gửi state=0:
+  // Khi phản hồi state=1 trả về, interpretWebRC chưa chạy (armed chưa đổi);
+  // Khi phản hồi state=0 trả về, armed đã được update bởi control loop, đây mới là kết quả thực tế.
   if (idx === 0 || idx === 1 || idx === 2) {
     if (idx === 0)      showToast('🔓 Đang mở khóa...');
     else if (idx === 1) showToast('🔒 Đang khóa...');
     else if (idx === 2) showToast('🛑 Đang gửi lệnh dừng...');
     sendButtonData(idx, 1);
     setTimeout(() => {
-      lastPressedButton = idx; // 在 state=0 发出前标记，确保用 state=0 的响应判断结果
+      lastPressedButton = idx; // Đánh dấu trước khi gửi state=0, đảm bảo dùng phản hồi state=0 để check
       sendButtonData(idx, 0);
     }, 100);
     if (navigator.vibrate) navigator.vibrate(30);
   }
 }
 
-/*======================== Toast 提示 ========================*/
+/*======================== Thông báo Toast ========================*/
 function showToast(msg) {
   let t = document.getElementById('toast-msg');
   if (!t) {
@@ -556,7 +556,7 @@ function showToast(msg) {
   t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2000);
 }
 
-/*======================== 调试控制台 ========================*/
+/*======================== Console Gỡ lỗi ========================*/
 function toggleConsole() {
   const panel = document.getElementById('console-panel');
   const btn   = document.getElementById('btn-5');
@@ -602,7 +602,7 @@ function fetchConsoleLogs() {
       });
       out.appendChild(frag);
       out.scrollTop = out.scrollHeight;
-      // 限制 DOM 行数，避免长时间运行内存泄漏
+      // Giới hạn số dòng DOM, tránh tràn bộ nhớ khi chạy lâu
       while (out.children.length > 200) out.removeChild(out.firstChild);
     }
 
@@ -633,7 +633,7 @@ function sendConsoleCmd() {
     }).catch(()=>{});
 }
 
-// 回车发送 + ↑/↓ 命令历史
+// Enter để gửi + ↑/↓ Lịch sử lệnh
 (function(){
   const cmdHistory = [];
   let historyIdx   = -1;
@@ -655,11 +655,11 @@ function sendConsoleCmd() {
   });
 })();
 
-/*======================== 事件绑定 ========================*/
+/*======================== Gán Sự kiện ========================*/
 document.addEventListener('DOMContentLoaded', init);
 document.addEventListener('contextmenu', e => e.preventDefault());
 
-// 心跳：2000ms，连续3次失败才判定断连
+// Heartbeat: 2000ms, lỗi 3 lần liên tiếp thì tính là mất kết nối
 setInterval(() => {
   if (connectionOk) sendToESP('/web_rc/heartbeat', {t:4, ts:performance.now()});
 }, 2000);
