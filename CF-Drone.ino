@@ -35,6 +35,7 @@ void setup() {
 	setupWebRC();  // Khởi tạo Web RC
 #endif
 	setupIMU();
+	setupAltHold();
 	setupRC();
 	setLED(false);
 	print("Khởi tạo hoàn tất!\n");
@@ -45,6 +46,7 @@ void setup() {
 
 void loop() {
 	readIMU();
+	updateAltHold();
 	step();
 	readRC();
 #if WEB_RC_ENABLED

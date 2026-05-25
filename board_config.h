@@ -66,5 +66,7 @@
 #define BOARD_SPI_MOSI     23
 #define BOARD_SPI_CS       5
 #define BOARD_LED_ENABLED  1
+#define BOARD_I2C_SDA_PIN  16
+#define BOARD_I2C_SCL_PIN  17
 
 #endif

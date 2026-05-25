@@ -71,6 +71,7 @@ extern const int MOTOR_REAR_LEFT, MOTOR_REAR_RIGHT, MOTOR_FRONT_RIGHT, MOTOR_FRO
 extern float motors[4];
 extern float controlRoll, controlPitch, controlThrottle, controlYaw, controlMode;
 extern float batteryVoltage;  // battery.ino
+extern float altholdThrustTarget; // althold.ino
 
 void control() {
 	interpretControls();
@@ -118,10 +119,18 @@ void interpretControls() {
 
 	if (abs(controlYaw) < 0.1) controlYaw = 0; // yaw dead zone
 
-	if (controlThrottle < 0.05f) {
-		thrustTarget = 0.0f;   // Vùng chết đáy -> Chạy không tải (idle), PID không hoạt động
+	if (mode == ALTHOLD) {
+		if (altholdThrustTarget < 0.05f) {
+			thrustTarget = 0.0f;
+		} else {
+			thrustTarget = mapf(altholdThrustTarget, 0.05f, 1.0f, motThrMin, motThrMax);
+		}
 	} else {
-		thrustTarget = mapf(controlThrottle, 0.05f, 1.0f, motThrMin, motThrMax);
+		if (controlThrottle < 0.05f) {
+			thrustTarget = 0.0f;   // Vùng chết đáy -> Chạy không tải (idle), PID không hoạt động
+		} else {
+			thrustTarget = mapf(controlThrottle, 0.05f, 1.0f, motThrMin, motThrMax);
+		}
 	}
 
 	if (mode == STAB) {
@@ -268,10 +277,9 @@ void interpretWebRC() {
 		mode = ACRO;
 	}
 
-	// Nút 8: Chế độ Giữ độ cao (ALTHOLD) (Sườn lên) - Chưa hỗ trợ, chuyển về STAB để tránh lỗi tuần hoàn
+	// Nút 8: Chế độ Giữ độ cao (ALTHOLD) (Sườn lên)
 	if (risingEdge & 0x0100) {
-		mode = STAB;
-		setWebRCWarn("Chế độ Giữ độ cao chưa hỗ trợ, đã chuyển sang Cân bằng");
+		mode = ALTHOLD;
 	}
 
 	// Log thay đổi chế độ bay
