@@ -71,29 +71,42 @@ void updateAltHold() {
 
     // Xử lý logic ALTHOLD khi mode == ALTHOLD (3)
     if (mode == 3 /* ALTHOLD */) {
-        // Vùng deadband cho cần ga (0.4 đến 0.6 là giữ nguyên độ cao)
-        if (controlThrottle > 0.6f) {
-            targetVelocityZ = (controlThrottle - 0.6f) * 2.0f; // Tối đa lên 0.8m/s
-            targetAltitude = currentAltitude; // Cập nhật lại mục tiêu để khóa khi về deadband
-        } else if (controlThrottle < 0.4f && controlThrottle > 0.05f) { // >0.05 để tránh rơi tự do nếu gạt xuống tận cùng khi chưa muốn disarm
-            targetVelocityZ = (controlThrottle - 0.4f) * 2.0f; // Tối đa xuống -0.7m/s
-            targetAltitude = currentAltitude;
+        // Joystick có lò xo (spring-centered): thả ra về vị trí giữa (controlThrottle ≈ 0.5)
+        //   - controlThrottle > 0.6  : Bay lên, vận tốc tỷ lệ với mức đẩy
+        //   - controlThrottle < 0.4  : Bay xuống, vận tốc tỷ lệ với mức kéo
+        //   - 0.4 <= controlThrottle <= 0.6 (vùng chết): Giữ nguyên độ cao
+        const float DEAD_HIGH = 0.6f;
+        const float DEAD_LOW  = 0.4f;
+        const float MAX_CLIMB_SPEED  =  1.0f; // m/s lên
+        const float MAX_DESCEND_SPEED = -1.0f; // m/s xuống
+
+        if (controlThrottle > DEAD_HIGH) {
+            // Cần ga nâng lên trên vùng chết → Bay lên
+            float ratio = (controlThrottle - DEAD_HIGH) / (1.0f - DEAD_HIGH); // 0..1
+            targetVelocityZ = ratio * MAX_CLIMB_SPEED;
+            targetAltitude  = currentAltitude; // Cập nhật mục tiêu để khóa khi về deadband
+        } else if (controlThrottle < DEAD_LOW && controlThrottle > 0.05f) {
+            // Cần ga kéo xuống dưới vùng chết → Bay xuống
+            float ratio = (DEAD_LOW - controlThrottle) / (DEAD_LOW - 0.05f); // 0..1
+            targetVelocityZ = ratio * MAX_DESCEND_SPEED;
+            targetAltitude  = currentAltitude;
         } else if (controlThrottle <= 0.05f) {
-            targetVelocityZ = -1.0f; // Hạ cánh nhanh hoặc idle
-            targetAltitude = currentAltitude;
+            // Kéo hết xuống đáy → Hạ cánh / Ngắt động cơ
+            targetVelocityZ = -1.5f;
+            targetAltitude  = currentAltitude;
         } else {
-            // Cần ga ở giữa (0.4 -> 0.6) -> Giữ vị trí (Velocity = Output của Position PID)
+            // Vùng chết (0.4 → 0.6) → Giữ độ cao hiện tại bằng Position PID
             targetVelocityZ = positionZPID.update(targetAltitude - currentAltitude);
             targetVelocityZ = constrain(targetVelocityZ, -0.5f, 0.5f);
         }
 
-        // Vòng PID Vận tốc Z
+        // Vòng PID Vận tốc Z → Tính lực đẩy bù
         float velocityError = targetVelocityZ - currentVelocityZ;
         float pidOut = velocityZPID.update(velocityError);
-        
-        // Mức ga lơ lửng cơ sở (cần được tune tay hoặc tự động học, tạm thời fix ở 0.5)
-        float hoverThrust = 0.5f; 
-        
+
+        // Mức ga lơ lửng cơ sở (cần tune thực tế)
+        float hoverThrust = 0.5f;
+
         altholdThrustTarget = hoverThrust + pidOut;
         altholdThrustTarget = constrain(altholdThrustTarget, 0.05f, 1.0f);
     } else {

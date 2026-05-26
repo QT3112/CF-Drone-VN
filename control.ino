@@ -133,7 +133,7 @@ void interpretControls() {
 		}
 	}
 
-	if (mode == STAB) {
+	if (mode == STAB || mode == ALTHOLD) {
 		float yawTarget = attitudeTarget.getYaw();
 		if (!armed || invalid(yawTarget) || controlYaw != 0) yawTarget = attitude.getYaw(); // reset yaw target
 		attitudeTarget = Quaternion::fromEuler(Vector(controlRoll * tiltMax, controlPitch * tiltMax, yawTarget));
