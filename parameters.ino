@@ -15,11 +15,14 @@ extern float motThrMax;
 extern int mavlinkSysId;
 extern Rate telemetrySlow, telemetryFast;
 extern float rcLossTimeout, descendTime;
-extern int flightModes[3];
+
 extern Vector accBias, accScale;
 extern Vector imuRotation;
 extern LowPassFilter<Vector> gyroBiasFilter;
 extern int rcRxPin;
+extern float hoverThrust;
+extern float maxClimbSpeed;
+extern float preSpinThrust;
 
 Preferences storage;
 
@@ -59,9 +62,10 @@ Parameter parameters[] = {
 	{"CTL_R_RATE_MAX", &maxRate.x},
 	{"CTL_Y_RATE_MAX", &maxRate.z},
 	{"CTL_TILT_MAX", &tiltMax},
-	{"CTL_FLT_MODE_0", &flightModes[0]},
-	{"CTL_FLT_MODE_1", &flightModes[1]},
-	{"CTL_FLT_MODE_2", &flightModes[2]},
+	// althold - tinh chỉnh chế độ giữ độ cao
+	{"AH_HOVER_THR",   &hoverThrust},
+	{"AH_MAX_CLIMB",   &maxClimbSpeed},
+	{"AH_PRESPIN_THR", &preSpinThrust},
 	// imu
 	{"IMU_ROT_ROLL",  &imuRotation.x},
 	{"IMU_ROT_PITCH", &imuRotation.y},

@@ -13,7 +13,7 @@ extern void webLog(const char* msg);
 #endif
 
 extern const int MOTOR_REAR_LEFT, MOTOR_REAR_RIGHT, MOTOR_FRONT_RIGHT, MOTOR_FRONT_LEFT;
-extern const int RAW, ACRO, STAB, AUTO;
+extern const int ALTHOLD, AUTO;
 extern float t, dt, loopRate;
 extern float controlTime;
 extern uint16_t channels[16];
@@ -38,7 +38,7 @@ const char* motd =
 "wifi - Hiển thị thông tin WiFi\n"
 "ap <ssid> <password> - Cấu hình chế độ AP SSID và mật khẩu\n"
 "sta <ssid> <password> - Cấu hình chế độ STA (Kết nối WiFi)\n"
-"raw/stab/acro/auto - Chuyển chế độ bay\n"
+"althold - Chuyển về chế độ ALTHOLD (chế độ mặc định duy nhất)\n"
 "arm - Mở khóa Drone\n"
 "disarm - Khóa Drone\n"
 "psq - Hiển thị quaternion tư thế\n"
@@ -126,12 +126,8 @@ void doCommand(String str, bool echo = false) {
 		armed = true;
 	} else if (command == "disarm") {
 		armed = false;
-	} else if (command == "raw") {
-		mode = RAW;
-	} else if (command == "stab") {
-		mode = STAB;
-	} else if (command == "acro") {
-		mode = ACRO;
+	} else if (command == "althold") {
+		mode = ALTHOLD;
 	} else if (command == "auto") {
 		mode = AUTO;
 	} else if (command == "rc") {

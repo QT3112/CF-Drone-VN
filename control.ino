@@ -32,21 +32,19 @@
 #define PITCH_D ROLL_D
 #define YAW_P 3 // Phản hồi Yaw hơi chậm hơn
 // ============== Giá trị giới hạn ==============
-#define PITCHRATE_MAX radians(360) // Giới hạn tốc độ quay tối đa (1000°/s)
-#define ROLLRATE_MAX radians(360)
-#define YAWRATE_MAX radians(300) // Tốc độ quay Yaw chậm hơn một chút
-#define TILT_MAX radians(30) // Góc nghiêng tối đa 30°
-#define ALTHOLD_HOVER_THRUST 0.5f   // Lực đẩy cơ bản khi lơ lửng ở chế độ Giữ độ cao (sẽ thay thế khi có cảm biến áp suất)
-#define ARM_THROTTLE_LIMIT   0.05f  // Giới hạn ga khi mở khóa (sau khi chuẩn hóa 0~1), 5%, vượt quá sẽ cấm mở khóa
-#define RATES_D_LPF_ALPHA 0.2 // cutoff frequency ~ 40 Hz
+#define PITCHRATE_MAX radians(120) // Tốc độ quay tối đa (an toàn cho người mới)
+#define ROLLRATE_MAX  radians(120)
+#define YAWRATE_MAX   radians(90)  // Yaw chậm hơn cho ổn định
+#define TILT_MAX      radians(15)  // Giới hạn góc nghiêng 15° (an toàn)
+#define ARM_THROTTLE_LIMIT 0.05f   // Giới hạn ga khi mở khóa
+#define RATES_D_LPF_ALPHA  0.2     // cutoff frequency ~ 40 Hz
 
 float motThrMin = 0.10f;  // Giới hạn lực đẩy tối thiểu (ngõ ra khi cần ga ở mức thấp nhất), có thể chỉnh qua thông số MOT_THR_MIN
 float motThrMax = 1.0f;   // Giới hạn lực đẩy tối đa (ngõ ra khi cần ga ở mức cao nhất), có thể chỉnh qua thông số MOT_THR_MAX
 
-const int RAW = 0, ACRO = 1, STAB = 2, ALTHOLD = 3, AUTO = 4; // flight modes
-int mode = STAB;
+const int ALTHOLD = 3, AUTO = 4; // Chế độ bay (ALTHOLD là chế độ duy nhất)
+int mode   = ALTHOLD;              // Luôn ở ALTHOLD
 bool armed = false;
-int flightModes[] = {STAB, STAB, STAB}; // Chế độ bay tương ứng với 3 mức công tắc trên RC, có thể cấu hình qua thông số CTL_FLT_MODE_0/1/2
 
 #if WEB_RC_ENABLED
 extern uint16_t webRCButtons;
@@ -85,72 +83,28 @@ void control() {
 }
 
 void interpretControls() {
-	if (controlMode < 0.25) mode = flightModes[0];
-	else if (controlMode <= 0.75) mode = flightModes[1];
-	else if (controlMode > 0.75) mode = flightModes[2];
+	// Chế độ luôn là ALTHOLD, không cần chọn từ công tắc RC
+	if (mode != AUTO) mode = ALTHOLD;
+	if (mode == AUTO) return; // AUTO do failsafe kích hoạt, phi công không can thiệp
 
-	if (mode == AUTO) return; // pilot is not effective in AUTO mode
+	// Vùng chết Yaw
+	if (abs(controlYaw) < 0.1) controlYaw = 0;
 
-#if WEB_RC_ENABLED
-	if (!isUsingWebRC()) { // Cử chỉ mở khóa SBUS chỉ có tác dụng khi WebRC không hoạt động
-#endif
-	static bool armWarnNotified = false;  // Chống spam log: Thông báo cấm mở khóa khi pin yếu
-	if (controlThrottle < 0.05 && controlYaw > 0.95) { // arm gesture
-		if (batteryVoltage > VBAT_ABSENT_THRESHOLD && batteryVoltage < VBAT_WARN_THRESHOLD) {
-			// Mức L1 và thấp hơn: Cấm mở khóa, thông báo khi trạng thái thay đổi
-			if (!armWarnNotified) {
-				print("Pin yếu(%.2fV), cấm mở khóa\n", batteryVoltage);
-#if WEB_RC_ENABLED
-				char warnBuf[64];
-				snprintf(warnBuf, sizeof(warnBuf), "Pin yếu(%.2fV) Cấm mở khóa", batteryVoltage);
-				setWebRCWarn(warnBuf);
-#endif
-				armWarnNotified = true;
-			}
-		} else {
-			armed = true;
-			armWarnNotified = false; // Reset sau khi thay pin mới
-		}
-	}
-	if (controlThrottle < 0.05 && controlYaw < -0.95) armed = false; // disarm gesture
-#if WEB_RC_ENABLED
-	}
-#endif
-
-	if (abs(controlYaw) < 0.1) controlYaw = 0; // yaw dead zone
-
-	if (mode == ALTHOLD) {
-		if (altholdThrustTarget < 0.05f) {
-			thrustTarget = 0.0f;
-		} else {
-			thrustTarget = mapf(altholdThrustTarget, 0.05f, 1.0f, motThrMin, motThrMax);
-		}
+	// Thrust từ ALTHOLD PID
+	if (altholdThrustTarget < 0.05f) {
+		thrustTarget = 0.0f;
 	} else {
-		if (controlThrottle < 0.05f) {
-			thrustTarget = 0.0f;   // Vùng chết đáy -> Chạy không tải (idle), PID không hoạt động
-		} else {
-			thrustTarget = mapf(controlThrottle, 0.05f, 1.0f, motThrMin, motThrMax);
-		}
+		thrustTarget = mapf(altholdThrustTarget, 0.05f, 1.0f, motThrMin, motThrMax);
 	}
 
-	if (mode == STAB || mode == ALTHOLD) {
+	// Đặt hướng drone (Attitude target) dựa trên joystick phải + Yaw
+	{
 		float yawTarget = attitudeTarget.getYaw();
-		if (!armed || invalid(yawTarget) || controlYaw != 0) yawTarget = attitude.getYaw(); // reset yaw target
-		attitudeTarget = Quaternion::fromEuler(Vector(controlRoll * tiltMax, controlPitch * tiltMax, yawTarget));
-		ratesExtra = Vector(0, 0, -controlYaw * maxRate.z); // positive yaw stick means clockwise rotation in FLU
-	}
-
-	if (mode == ACRO) {
-		attitudeTarget.invalidate(); // skip attitude control
-		ratesTarget.x = controlRoll * maxRate.x;
-		ratesTarget.y = controlPitch * maxRate.y;
-		ratesTarget.z = -controlYaw * maxRate.z; // positive yaw stick means clockwise rotation in FLU
-	}
-
-	if (mode == RAW) { // direct torque control
-		attitudeTarget.invalidate(); // skip attitude control
-		ratesTarget.invalidate(); // skip rate control
-		torqueTarget = Vector(controlRoll, controlPitch, -controlYaw) * 0.1;
+		if (!armed || invalid(yawTarget) || controlYaw != 0)
+			yawTarget = attitude.getYaw(); // Reset yaw target nếu mới arm hoặc đang quay
+		attitudeTarget = Quaternion::fromEuler(
+			Vector(controlRoll * tiltMax, controlPitch * tiltMax, yawTarget));
+		ratesExtra = Vector(0, 0, -controlYaw * maxRate.z);
 	}
 }
 
@@ -190,8 +144,13 @@ void controlTorque() {
 		return;
 	}
 
+	if (thrustTarget <= 0.0f) {
+		memset(motors, 0, sizeof(motors)); // Tắt hoàn toàn (AH_IDLE hoặc cú hạ cánh)
+		return;
+	}
+
 	if (thrustTarget < motThrMin) {
-		for (int i = 0; i < 4; i++) motors[i] = motThrMin; // idle thrust
+		for (int i = 0; i < 4; i++) motors[i] = motThrMin; // idle spin (không thể xảy ra với althold mới)
 		return;
 	}
 
@@ -221,9 +180,6 @@ void desaturate(float& a, float& b, float& c, float& d) {
 
 const char* getModeName() {
 	switch (mode) {
-		case RAW:     return "RAW";
-		case ACRO:    return "ACRO";
-		case STAB:    return "STAB";
 		case ALTHOLD: return "ALTHOLD";
 		case AUTO:    return "AUTO";
 		default:      return "UNKNOWN";
@@ -231,62 +187,42 @@ const char* getModeName() {
 }
 
 #if WEB_RC_ENABLED
-// Xử lý nút điều khiển trên WebRC (Chỉ phụ trách ARM/DISARM và chuyển chế độ)
+// Xử lý nút bấm Web RC (chỉ ARM / DISARM / DừNG KHẨN CẤP)
 void interpretWebRC() {
 	if (!isUsingWebRC()) return;
 
-	// Xử lý nút mở khóa/khóa (Phát hiện sườn lên để tránh kích hoạt lặp lại mỗi chu kỳ)
+	// Phát hiện sườn lên của nút bấm
 	static uint16_t lastWebRCButtons = 0;
-	uint16_t risingEdge = webRCButtons & ~lastWebRCButtons;
-	lastWebRCButtons = webRCButtons;
+	uint16_t risingEdge  = webRCButtons & ~lastWebRCButtons;
+	lastWebRCButtons     = webRCButtons;
 
-	// Log trạng thái thay đổi mở khóa/khóa
+	// Log khi trạng thái arm thay đổi
 	static bool lastArmedState = false;
 	if (armed != lastArmedState) {
-		print(armed ? "Web RC: Đã mở khóa\n" : "Web RC: Đã khóa\n");
+		print(armed ? "Web RC: Da mo khoa\n" : "Web RC: Da khoa\n");
 		lastArmedState = armed;
 	}
 
-	// Nút 0: Mở khóa (Sườn lên)
+	// Nút 0: Mở khóa
 	if (risingEdge & 0x0001) {
-		if (controlThrottle < ARM_THROTTLE_LIMIT) {
+		if (batteryVoltage > VBAT_WARN_THRESHOLD || batteryVoltage < VBAT_ABSENT_THRESHOLD) {
 			armed = true;
+			print("Web RC: Mo khoa\n");
 		} else {
-			setWebRCWarn("Ga quá cao, không thể mở khóa");
+			setWebRCWarn("Pin yeu, khong the mo khoa");
 		}
 	}
 
-	// Nút 1: Khóa (Sườn lên)
+	// Nút 1: Khóa
 	if (risingEdge & 0x0002) {
 		armed = false;
 	}
 
-	// Nút 2: Dừng khẩn cấp (Sườn lên)
+	// Nút 2: Dừng khẩn cấp
 	if (risingEdge & 0x0004) {
-		armed = false;
+		armed        = false;
 		thrustTarget = 0.0f;
-	}
-
-	// Nút 6: Chế độ Cân bằng (STAB) (Sườn lên)
-	if (risingEdge & 0x0040) {
-		mode = STAB;
-	}
-
-	// Nút 7: Chế độ Nhào lộn (ACRO) (Sườn lên)
-	if (risingEdge & 0x0080) {
-		mode = ACRO;
-	}
-
-	// Nút 8: Chế độ Giữ độ cao (ALTHOLD) (Sườn lên)
-	if (risingEdge & 0x0100) {
-		mode = ALTHOLD;
-	}
-
-	// Log thay đổi chế độ bay
-	static int lastMode = STAB;
-	if (mode != lastMode) {
-		print("Web RC: Chế độ chuyển sang %s\n", getModeName());
-		lastMode = mode;
+		print("Web RC: DUNG KHAN CAP!\n");
 	}
 }
 #endif

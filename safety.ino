@@ -70,7 +70,7 @@ void autoFailsafe() {
 	
 	// control* đã bao gồm đầu vào SBUS/MAVLink/WebRC, có thể kiểm tra trực tiếp
 	if (roll != controlRoll || pitch != controlPitch || yaw != controlYaw || abs(throttle - controlThrottle) > 0.05) {
-		if (mode == AUTO) mode = STAB;
+		if (mode == AUTO) mode = ALTHOLD; // Trở về ALTHOLD khi phi công can thiệp
 	}
 	
 	roll = controlRoll;
